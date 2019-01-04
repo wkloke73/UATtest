@@ -1,0 +1,70 @@
+#
+# GetSimple CMS htaccess ROOT file
+# apache 2.4 
+#
+
+# The following require certain allow overrides, if getting 500 error comment them out one by one 
+# can be resolved in apache httpd.conf to ensure security alternatives
+
+# override charset
+AddDefaultCharset UTF-8
+
+# prevent directory listings
+Options -Indexes
+
+# Follow symbolink links, This is required for rewrites on some hosts
+Options +FollowSymLinks
+
+# Set the default handler.
+DirectoryIndex index.php
+
+# blocks direct access to the XML files - they hold all the data!
+<Files ~ "\.xml$">
+	<IfModule !mod_authz_core.c>
+		Deny from all
+	</IfModule>
+	<IfModule mod_access_compat.c>
+		Deny from all
+	</IfModule>
+	<IfModule mod_authz_core.c>
+		<IfModule !mod_access_compat.c>
+			Require all denied
+		</IfModule>
+	</IfModule>	
+</Files>
+
+<Files sitemap.xml>
+	<IfModule !mod_authz_core.c>
+		Allow from all
+	</IfModule>
+	<IfModule mod_access_compat.c>
+		Allow from all
+	</IfModule>
+	<IfModule mod_authz_core.c>
+		<IfModule !mod_access_compat.c>
+			Require all granted
+		</IfModule>
+	</IfModule>	
+</Files>
+
+# handle rewrites for fancy urls
+<IfModule mod_rewrite.c>
+	RewriteEngine on
+
+	# Usually RewriteBase is just '/', but 
+	# replace it with your subdirectory path
+	RewriteBase /
+	
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteRule /?([A-Za-z0-9_-]+)/?$ index.php?id=$1 [QSA,L]
+</IfModule>
+
+RewriteCond %{HTTP_HOST} ^victoriafacelift\.hairlosssolution\.com\.my$ [OR]
+RewriteCond %{HTTP_HOST} ^www\.victoriafacelift\.hairlosssolution\.com\.my$
+RewriteRule ^/?$ "http\:\/\/www\.victoriafacelift\.com\.my" [R=301,L]
+
+
+RewriteCond %{HTTP_HOST} ^victoriafacelift.com.my [NC]
+RewriteRule ^(.*)$ http://www.victoriafacelift.com.my/$1 [L,R=301]
+
